@@ -1,13 +1,16 @@
 package com.clover.activiti.flow.initDB;
 
-import java.io.InputStream;
-import java.util.zip.ZipInputStream;
+import java.util.List;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
-import org.activiti.engine.RepositoryService;
-import org.activiti.engine.repository.DeploymentBuilder;
+import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.repository.Deployment;
+import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.junit.Test;
+
+import com.alibaba.fastjson.JSON;
 
 public class TestActivitiFlow {
 	@Test
@@ -30,15 +33,45 @@ public class TestActivitiFlow {
 	}
 
 	@Test
-	public void testDeployment() {
+	public void testCreateTableByCfg() {
 		ProcessEngine processEngine = ProcessEngineConfiguration.createProcessEngineConfigurationFromResource("activiti.cfg.xml").buildProcessEngine();
-		RepositoryService repositoryService = processEngine.getRepositoryService();
-		DeploymentBuilder deploymentBuilder = repositoryService.createDeployment();
-		InputStream in = this.getClass().getResourceAsStream("HnBossIdMgrFlow.zip");
-		ZipInputStream zipInputStream = new ZipInputStream(in);
-		deploymentBuilder.addZipInputStream(zipInputStream);
+		System.out.println(processEngine);
+	}
 
-		// 发布
-		deploymentBuilder.deploy();
+	@Test
+	public void testDeployment() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		Deployment deployment = processEngine.getRepositoryService().createDeployment().addClasspathResource("LeaveProcess.bpmn").deploy();
+		System.out.println(JSON.toJSONString(deployment));
+	}
+
+	@Test
+	public void testStartProcess() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		ProcessInstance processInstance = processEngine.getRuntimeService().startProcessInstanceByKey("leaveProcess");
+		System.out.println(processInstance.getActivityId());
+		System.out.println(processInstance.getId());
+		System.out.println(processInstance.getProcessDefinitionKey());
+		System.out.println(processInstance.getProcessDefinitionId());
+	}
+
+	@Test
+	public void testQueryTask() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		List<Task> taskList = processEngine.getTaskService().createTaskQuery().taskAssignee("zhangdq").list();
+		if (taskList != null && taskList.size() > 0) {
+			for (Task task : taskList) {
+				System.out.println(task.getId());
+				System.out.println(task.getParentTaskId());
+				System.out.println(task.getFormKey());
+				System.out.println(task.getCreateTime());
+			}
+		}
+	}
+
+	@Test
+	public void testCompleteTask() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		processEngine.getTaskService().complete("22504");
 	}
 }
