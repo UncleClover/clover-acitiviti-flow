@@ -1,13 +1,19 @@
 package com.clover.activiti.flow.initDB;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.repository.Deployment;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 import com.alibaba.fastjson.JSON;
@@ -41,7 +47,16 @@ public class TestActivitiFlow {
 	@Test
 	public void testDeployment() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-		Deployment deployment = processEngine.getRepositoryService().createDeployment().addClasspathResource("LeaveProcess.bpmn").deploy();
+		Deployment deployment = processEngine.getRepositoryService().createDeployment().addClasspathResource("LeaveProcess.bpmn").addClasspathResource("LeaveProcess.png").deploy();
+		System.out.println(JSON.toJSONString(deployment));
+	}
+
+	@Test
+	public void testDeploymentByZip() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		InputStream in = this.getClass().getClassLoader().getResourceAsStream("HnBossIdMgrFlow.zip");
+		ZipInputStream zipInputStream = new ZipInputStream(in);
+		Deployment deployment = processEngine.getRepositoryService().createDeployment().addZipInputStream(zipInputStream).deploy();
 		System.out.println(JSON.toJSONString(deployment));
 	}
 
@@ -73,5 +88,37 @@ public class TestActivitiFlow {
 	public void testCompleteTask() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 		processEngine.getTaskService().complete("22504");
+	}
+
+	@Test
+	public void testQueryProcDef() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		List<ProcessDefinition> procDefList = processEngine.getRepositoryService().createProcessDefinitionQuery().processDefinitionKey("leaveProcess").orderByProcessDefinitionVersion().desc().list();
+		if (procDefList == null || procDefList.size() < 1) {
+			return;
+		}
+
+		for (ProcessDefinition procDef : procDefList) {
+			System.out.println(procDef.getId());
+			System.out.println(procDef.getDeploymentId());
+			System.out.println(procDef.getKey());
+			System.out.println(procDef.getName());
+			System.out.println(procDef.getVersion());
+			System.out.println("===============================");
+		}
+	}
+
+	@Test
+	public void testDelProcDef() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		processEngine.getRepositoryService().deleteDeployment("27501", true);
+	}
+
+	@Test
+	public void testQueryProcDefImg() throws IOException {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		InputStream in = processEngine.getRepositoryService().getResourceAsStream("30001", "LeaveProcess.png");
+		File destination = new File("D:\\setting\\LeaveProcess.png");
+		FileUtils.copyInputStreamToFile(in, destination);
 	}
 }
