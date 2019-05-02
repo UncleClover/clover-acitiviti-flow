@@ -12,6 +12,9 @@ import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.ProcessEngines;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.history.HistoricActivityInstance;
+import org.activiti.engine.history.HistoricProcessInstance;
+import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -126,30 +129,85 @@ public class TestActivitiFlow {
 		File destination = new File("D:\\setting\\LeaveProcess.png");
 		FileUtils.copyInputStreamToFile(in, destination);
 	}
-	
+
 	@Test
 	public void testSetTaskProcessVariable() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 		TaskService taskService = processEngine.getTaskService();
 		taskService.setVariableLocal("32504", "reason", "哈哈");
 	}
-	
+
 	@Test
 	public void testSetRuntimeProcessVariable() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 		RuntimeService runtimeService = processEngine.getRuntimeService();
 		runtimeService.setVariableLocal("32501", "reason", "回去睡个回笼觉");
 	}
-	
+
 	@Test
 	public void testQueryProcessVariable() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
 		TaskService taskService = processEngine.getTaskService();
 		Map<String, Object> map = taskService.getVariables("32504");
 		System.out.println(map.size());
-		
+
 		RuntimeService runtimeService = processEngine.getRuntimeService();
 		Map<String, Object> runTimeMap = runtimeService.getVariablesLocal("32501");
 		System.out.println(runTimeMap.size());
+	}
+
+	@Test
+	public void testQueryTaskHis() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		List<HistoricTaskInstance> hisTaskList = processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskId("32504").orderByHistoricTaskInstanceEndTime().asc().list();
+
+		if (hisTaskList == null || hisTaskList.size() == 0) {
+			return;
+		}
+
+		for (HistoricTaskInstance historicTaskInstance : hisTaskList) {
+			System.out.print(historicTaskInstance.getAssignee() + "\t");
+			System.out.print(historicTaskInstance.getName() + "\t");
+			System.out.print(historicTaskInstance.getTaskDefinitionKey() + "\t");
+			System.out.print(historicTaskInstance.getTaskDefinitionKey() + "\t");
+			System.out.println();
+		}
+	}
+
+	@Test
+	public void testQueryProcHis() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		List<HistoricProcessInstance> hisProcessInstanceList = processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId("10001").orderByProcessInstanceStartTime().asc().list();
+
+		if (hisProcessInstanceList == null || hisProcessInstanceList.size() == 0) {
+			return;
+		}
+
+		for (HistoricProcessInstance historicProcessInstance : hisProcessInstanceList) {
+			System.out.print(historicProcessInstance.getDeploymentId() + "\t");
+			System.out.print(historicProcessInstance.getStartTime() + "\t");
+			System.out.println(historicProcessInstance.getProcessDefinitionKey());
+		}
+	}
+
+	@Test
+	public void testQueryHis() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		List<HistoricActivityInstance> list = processEngine.getHistoryService().createHistoricActivityInstanceQuery().processInstanceId("10001").orderByHistoricActivityInstanceStartTime().asc().list();
+
+		if (list == null || list.size() == 0) {
+			return;
+		}
+
+		for (HistoricActivityInstance historicActivityInstance : list) {
+			System.out.print(historicActivityInstance.getActivityId() + "\t");
+			System.out.print(historicActivityInstance.getActivityName() + "\t");
+			System.out.print(historicActivityInstance.getCalledProcessInstanceId() + "\t");
+			System.out.print(historicActivityInstance.getExecutionId() + "\t");
+			System.out.print(historicActivityInstance.getProcessDefinitionId() + "\t");
+			System.out.print(historicActivityInstance.getAssignee() + "\t");
+			System.out.print(historicActivityInstance.getTaskId() + "\t");
+			System.out.println(historicActivityInstance.getId());
+		}
 	}
 }
