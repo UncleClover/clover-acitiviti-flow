@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipInputStream;
 
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -47,7 +50,7 @@ public class TestActivitiFlow {
 	@Test
 	public void testDeployment() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-		Deployment deployment = processEngine.getRepositoryService().createDeployment().addClasspathResource("LeaveProcess.bpmn").addClasspathResource("LeaveProcess.png").deploy();
+		Deployment deployment = processEngine.getRepositoryService().createDeployment().addClasspathResource("LeaveProcess.bpmn").deploy();
 		System.out.println(JSON.toJSONString(deployment));
 	}
 
@@ -63,11 +66,13 @@ public class TestActivitiFlow {
 	@Test
 	public void testStartProcess() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-		ProcessInstance processInstance = processEngine.getRuntimeService().startProcessInstanceByKey("leaveProcess");
+		RuntimeService runtimeService = processEngine.getRuntimeService();
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("leaveProcess");
 		System.out.println(processInstance.getActivityId());
 		System.out.println(processInstance.getId());
 		System.out.println(processInstance.getProcessDefinitionKey());
 		System.out.println(processInstance.getProcessDefinitionId());
+		System.out.println(processInstance.getSuperExecutionId());
 	}
 
 	@Test
@@ -87,7 +92,7 @@ public class TestActivitiFlow {
 	@Test
 	public void testCompleteTask() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-		processEngine.getTaskService().complete("22504");
+		processEngine.getTaskService().complete("25002");
 	}
 
 	@Test
@@ -111,7 +116,7 @@ public class TestActivitiFlow {
 	@Test
 	public void testDelProcDef() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
-		processEngine.getRepositoryService().deleteDeployment("27501", true);
+		processEngine.getRepositoryService().deleteDeployment("1", true);
 	}
 
 	@Test
@@ -120,5 +125,31 @@ public class TestActivitiFlow {
 		InputStream in = processEngine.getRepositoryService().getResourceAsStream("30001", "LeaveProcess.png");
 		File destination = new File("D:\\setting\\LeaveProcess.png");
 		FileUtils.copyInputStreamToFile(in, destination);
+	}
+	
+	@Test
+	public void testSetTaskProcessVariable() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		TaskService taskService = processEngine.getTaskService();
+		taskService.setVariableLocal("32504", "reason", "哈哈");
+	}
+	
+	@Test
+	public void testSetRuntimeProcessVariable() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		RuntimeService runtimeService = processEngine.getRuntimeService();
+		runtimeService.setVariableLocal("32501", "reason", "回去睡个回笼觉");
+	}
+	
+	@Test
+	public void testQueryProcessVariable() {
+		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+		TaskService taskService = processEngine.getTaskService();
+		Map<String, Object> map = taskService.getVariables("32504");
+		System.out.println(map.size());
+		
+		RuntimeService runtimeService = processEngine.getRuntimeService();
+		Map<String, Object> runTimeMap = runtimeService.getVariablesLocal("32501");
+		System.out.println(runTimeMap.size());
 	}
 }

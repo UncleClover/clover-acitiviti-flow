@@ -4,7 +4,7 @@
     <startEvent id="startevent1" name="Start"></startEvent>
     <endEvent id="endevent1" name="End"></endEvent>
     <userTask id="projectMgrTask" name="项目经理" activiti:assignee="zhangdq"></userTask>
-    <userTask id="departmentMgrTask" name="部门经理"></userTask>
+    <userTask id="departmentMgrTask" name="部门经理" activiti:assignee="clover"></userTask>
     <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="projectMgrTask"></sequenceFlow>
     <sequenceFlow id="flow2" sourceRef="projectMgrTask" targetRef="departmentMgrTask"></sequenceFlow>
     <sequenceFlow id="flow3" sourceRef="departmentMgrTask" targetRef="endevent1"></sequenceFlow>
