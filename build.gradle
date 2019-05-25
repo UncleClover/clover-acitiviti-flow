@@ -3,8 +3,6 @@ import org.gradle.plugins.ide.eclipse.model.Facet
 apply plugin: 'java'
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
-apply plugin: 'APIJarProcess'
-apply plugin: 'yuicompressor'
 
 sourceCompatibility = 1.7   // 设置 JDK 版本
 sourceSets.main.java.srcDir 'src'   // 设置 Java 源码所在目录
@@ -23,7 +21,7 @@ configurations {
 }
 
 ext {
-    mavenPublicURL = "http://10.1.228.199:18081/nexus/content/groups/public/"
+    mavenPublicURL = "http://127.0.0.1:18081/repository/maven-public/"
 }
 repositories {
     maven { url mavenPublicURL }
@@ -31,11 +29,10 @@ repositories {
 
 buildscript {
     repositories {
-        maven { url "http://10.1.228.199:18081/nexus/content/groups/public/" }
+        maven { url "http://127.0.0.1:18081/repository/maven-public/" }
     }
     dependencies {
-        classpath group: 'com.ai.runner.plugin', name: 'apijarprocessplugin', version: '1.1'
-        classpath group: 'com.ai', name: 'yuicompressorplugin', version: '0.3.1'
+      
     }
 }
 
