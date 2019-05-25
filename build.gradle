@@ -1,0 +1,92 @@
+import org.gradle.plugins.ide.eclipse.model.Facet
+
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'APIJarProcess'
+apply plugin: 'yuicompressor'
+
+sourceCompatibility = 1.7   // 设置 JDK 版本
+sourceSets.main.java.srcDir 'src'   // 设置 Java 源码所在目录
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+    exclude group: 'log4j', module: 'log4j'
+    exclude group: "org.slf4j", module: "slf4j-log4j12"
+    exclude group: "org.slf4j", module: "log4j-over-slf4j"
+}
+configurations {
+    jsCommonLibs
+    uedTemplate
+}
+
+ext {
+    mavenPublicURL = "http://10.1.228.199:18081/nexus/content/groups/public/"
+}
+repositories {
+    maven { url mavenPublicURL }
+}
+
+buildscript {
+    repositories {
+        maven { url "http://10.1.228.199:18081/nexus/content/groups/public/" }
+    }
+    dependencies {
+        classpath group: 'com.ai.runner.plugin', name: 'apijarprocessplugin', version: '1.1'
+        classpath group: 'com.ai', name: 'yuicompressorplugin', version: '0.3.1'
+    }
+}
+
+sourceSets {
+    main {
+        java { srcDirs = ['src/main/java'] }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+    test {
+    	java {
+                srcDirs = [
+                        'src/test/java'
+                ]
+            }
+            resources { srcDirs = ['src/test/resources'] }
+        }
+}
+// 设置依赖
+dependencies {
+    compile group: 'org.activiti', name: 'activiti-engine', version:'5.22.0'
+    compile group: 'org.activiti', name: 'activiti-spring', version:'5.22.0'
+    compile(group: 'org.activiti', name: 'activiti-explorer', version:'5.22.0') {
+		exclude(module: 'vaadin')
+		exclude(module: 'dcharts-widget')
+		exclude(module: 'activiti-simple-workflow')
+    }
+    compile group: 'org.activiti', name: 'activiti-modeler', version:'5.22.0'
+    compile group: 'org.activiti', name: 'activiti-diagram-rest', version:'5.22.0'
+    compile 'com.oracle.jdbc:ojdbc7:12.1.0.2'
+    compile 'com.alibaba:fastjson:1.2.24'
+    
+    testCompile(
+            "org.springframework:spring-test:4.1.7.RELEASE",
+            "junit:junit:4.12"
+    )
+
+}
+
+// 设置 Project Facets
+eclipse {
+    wtp {
+        facet {
+            facet name: 'jst.web', type: Facet.FacetType.fixed
+            facet name: 'wst.jsdt.web', type: Facet.FacetType.fixed
+            facet name: 'jst.java', type: Facet.FacetType.fixed
+            facet name: 'jst.web', version: '3.0'
+            facet name: 'jst.java', version: '1.7'
+            facet name: 'wst.jsdt.web', version: '1.0'
+        }
+    }
+}
+
