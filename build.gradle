@@ -8,17 +8,6 @@ sourceCompatibility = 1.7   // 设置 JDK 版本
 sourceSets.main.java.srcDir 'src'   // 设置 Java 源码所在目录
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
-    exclude group: 'log4j', module: 'log4j'
-    exclude group: "org.slf4j", module: "slf4j-log4j12"
-    exclude group: "org.slf4j", module: "log4j-over-slf4j"
-}
-configurations {
-    jsCommonLibs
-    uedTemplate
-}
 
 ext {
     mavenPublicURL = "http://127.0.0.1:18081/repository/maven-public/"
@@ -32,7 +21,6 @@ buildscript {
         maven { url "http://127.0.0.1:18081/repository/maven-public/" }
     }
     dependencies {
-      
     }
 }
 
@@ -65,6 +53,7 @@ dependencies {
     compile group: 'org.activiti', name: 'activiti-diagram-rest', version:'5.22.0'
     compile 'com.oracle.jdbc:ojdbc7:12.1.0.2'
     compile 'com.alibaba:fastjson:1.2.24'
+    compile "mysql:mysql-connector-java:5.1.44"
     
     testCompile(
             "org.springframework:spring-test:4.1.7.RELEASE",

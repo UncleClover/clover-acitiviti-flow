@@ -26,17 +26,19 @@ import com.alibaba.fastjson.JSON;
 
 public class TestActivitiFlow {
 	@Test
-	public void testCreateDataSource() {
-		ProcessEngine processEngine = ProcessEngineConfiguration.createProcessEngineConfigurationFromResource("activiti.cfg.xml").buildProcessEngine();
-		System.out.println(processEngine);
-	}
-
-	@Test
 	public void testCreateTableByCode() {
 		ProcessEngineConfiguration pecfg = ProcessEngineConfiguration.createStandaloneInMemProcessEngineConfiguration();
-		pecfg.setJdbcDriver("oracle.jdbc.driver.OracleDriver");
-		pecfg.setJdbcUrl("jdbc:oracle:thin:@127.0.0.1:1521:orcl");
-		pecfg.setJdbcUsername("clover");
+		
+		// Oracle
+//		pecfg.setJdbcDriver("oracle.jdbc.driver.OracleDriver");
+//		pecfg.setJdbcUrl("jdbc:oracle:thin:@127.0.0.1:1521:orcl");
+//		pecfg.setJdbcUsername("clover");
+//		pecfg.setJdbcPassword("123456");
+		
+		// MySQL
+		pecfg.setJdbcDriver("com.mysql.jdbc.Driver");
+		pecfg.setJdbcUrl("jdbc:mysql://127.0.0.1:3306/clover_flow?characterEncoding=utf8");
+		pecfg.setJdbcUsername("root");
 		pecfg.setJdbcPassword("123456");
 
 		pecfg.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE);
@@ -50,6 +52,9 @@ public class TestActivitiFlow {
 		System.out.println(processEngine);
 	}
 
+	/**
+	 * 发布工作流
+	 */
 	@Test
 	public void testDeployment() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -57,6 +62,9 @@ public class TestActivitiFlow {
 		System.out.println(JSON.toJSONString(deployment));
 	}
 
+	/**
+	 * 通过压缩包发布工作流
+	 */
 	@Test
 	public void testDeploymentByZip() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -66,6 +74,9 @@ public class TestActivitiFlow {
 		System.out.println(JSON.toJSONString(deployment));
 	}
 
+	/**
+	 * 开启工作流
+	 */
 	@Test
 	public void testStartProcess() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -78,6 +89,9 @@ public class TestActivitiFlow {
 		System.out.println(processInstance.getSuperExecutionId());
 	}
 
+	/**
+	 * 查询工作流信息
+	 */
 	@Test
 	public void testQueryTask() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
@@ -92,6 +106,9 @@ public class TestActivitiFlow {
 		}
 	}
 
+	/**
+	 * 审批工作流
+	 */
 	@Test
 	public void testCompleteTask() {
 		ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
